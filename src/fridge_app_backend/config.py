@@ -90,13 +90,13 @@ class Config(BaseSettings):
         if self.db_type == "postgres":
             if not self.db_password:
                 raise ValueError("Database password is required for PostgreSQL connections")
-            return (
+            base = (
                 f"postgresql+psycopg2://{self.db_user}:{self.db_password}@"
                 f"{self.db_host}:{self.db_port}/{self.db_name}"
             )
 
             # Optional SSL mode (Supabase requires it)
-            if hasattr(self, "db_sslmode") and self.db_sslmode:
+            if self.db_sslmode:
                 return f"{base}?sslmode={self.db_sslmode}"
             return base
 
