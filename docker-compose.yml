@@ -4,7 +4,8 @@ services:
     image: postgres:16-alpine
     container_name: fridge-app-postgres
     env_file:
-      - .env-dev
+      - path: .env-dev
+        required: false
     ports:
       - "${DB_PORT:-5432}:5432"
     volumes:
@@ -24,7 +25,8 @@ services:
       dockerfile: ./src/fridge_app_backend/Dockerfile
     container_name: fridge-app-api
     env_file:
-      - .env-dev
+      - path: .env-dev
+        required: false
     ports:
       - "8000:8000"
     depends_on:
