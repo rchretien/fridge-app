@@ -50,7 +50,7 @@ services:
     build:
       target: dev
     volumes:
-      - ..:/workspaces
+      - .:/workspaces/fridge-app-backend
       - command-history-volume:/home/user/.history/
     profiles:
       - devcontainer
@@ -64,4 +64,3 @@ services:
 volumes:
   command-history-volume:
   postgres_data:
-
