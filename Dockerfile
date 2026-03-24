@@ -72,4 +72,4 @@ RUN --mount=type=cache,uid=1000,gid=1000,target=/home/user/.cache/uv \
 
 # Expose the app.
 ENTRYPOINT ["/workspaces/fridge-app-backend/.venv/bin/poe"]
-CMD ["serve"]
+CMD ["api"]

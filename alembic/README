@@ -1,0 +1,78 @@
+Generic single-database configuration.
+
+Create a .env-dev with
+
+```
+ENVIRONMENT = dev
+DB_TYPE = postgres
+API_NAME = Fridge Inventory App Backend
+DB_USER = postgres
+DB_password = *****
+DB_NAME = fridge_inventory_dev
+DB_HOST = localhost
+DB_PORT = 5432
+POSTGRES_USER = postgres
+POSTGRES_PASSWORD =  *****
+POSTGRES_DB = fridge_inventory_dev
+```
+
+```
+docker compose --env-file .env-dev --profile postgres up -d postgres
+```
+Make sure we don't have an existing posgres server running locally.
+For example on Mac
+
+```
+brew services stop postgresql
+```
+
+Verify you can connect to the postgres database
+```
+psql -h localhost -U postgres -d fridge_inventory_dev
+```
+Test that alembic can connect to the database
+```
+uv run alembic current
+```
+Create initial migration
+```
+ENVIRONMENT=dev uv run alembic revision --autogenerate -m "Initial schema"
+```
+
+Inspect the migration file in versions folder.
+
+Apply the migration
+```
+ENVIRONMENT=dev uv run alembic upgrade head
+```
+
+You should see:
+```
+INFO  [alembic.runtime.migration] Context impl PostgresqlImpl.
+INFO  [alembic.runtime.migration] Will assume transactional DDL.
+INFO  [alembic.runtime.migration] Running upgrade  -> ea84b5ce47e9, Initial schema
+
+
+Verify the schema is correct
+```
+psql -h localhost -U postgres -d fridge_inventory_dev
+```
+
+```
+\dt
+              List of relations
+ Schema |       Name       | Type  |  Owner
+--------+------------------+-------+----------
+ public | alembic_version  | table | postgres
+ public | product          | table | postgres
+ public | product_location | table | postgres
+ public | product_type     | table | postgres
+(4 rows)
+```
+
+Create a migration for seed data
+```
+ENVIRONMENT=dev uv run alembic revision -m "Add seed data for product types and locations"
+```
+
+ENVIRONMENT=dev uv run alembic upgrade head

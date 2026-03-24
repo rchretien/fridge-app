@@ -48,6 +48,7 @@ class Config(BaseSettings):
     db_name: str | None = None
     db_host: str | None = None
     db_port: str | None = None
+    db_sslmode: str | None = None
 
     @field_validator("environment")
     @classmethod
@@ -93,6 +94,11 @@ class Config(BaseSettings):
                 f"postgresql+psycopg2://{self.db_user}:{self.db_password}@"
                 f"{self.db_host}:{self.db_port}/{self.db_name}"
             )
+
+            # Optional SSL mode (Supabase requires it)
+            if hasattr(self, "db_sslmode") and self.db_sslmode:
+                return f"{base}?sslmode={self.db_sslmode}"
+            return base
 
         raise BadDBTypeError(db_type=self.db_type, allowed_types=AVAILABLE_DB_TYPES)
 
