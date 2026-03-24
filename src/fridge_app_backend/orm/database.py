@@ -3,11 +3,10 @@
 import logging
 from collections.abc import Generator
 
-from sqlalchemy import create_engine
+from sqlalchemy import func, select
 from sqlalchemy.orm import Session, sessionmaker
-from sqlalchemy.pool import NullPool, StaticPool
 
-from fridge_app_backend.config import config
+from fridge_app_backend.config import config, create_database_engine
 from fridge_app_backend.orm.models.db_models import (
     Base,
     ProductLocation,
@@ -19,27 +18,13 @@ from fridge_app_backend.orm.models.db_models import (
 logger = logging.getLogger(__name__)
 
 
-# Singleton engine object (connection pooling is applied for performance only in deployed mode)
-if config.db_type == "deployed":
-    logger.info("Database connection established for deployed environment.")
-    engine = create_engine(
-        url=config.db_url,
-        future=True,
-        connect_args=config.db_conn_args,
-        pool_size=20,
-        max_overflow=10,
-        pool_timeout=30,
-        pool_recycle=1800,
-    )
-elif config.db_type == "in_memory":
-    engine = create_engine(
-        url=config.db_url, future=True, connect_args=config.db_conn_args, poolclass=StaticPool
-    )
-else:
-    engine = create_engine(
-        url=config.db_url, future=True, connect_args=config.db_conn_args, poolclass=NullPool
-    )
-
+# Singleton engine object - all engine/pool construction is centralized in create_database_engine()
+engine = create_database_engine(
+    db_type=config.db_type,
+    environment=config.environment,
+    db_url=config.db_url,
+    db_conn_args=config.db_conn_args,
+)
 
 # We name it SessionLocal to distinguish it from the Session we are importing from SQLAlchemy.
 SessionLocal = sessionmaker(bind=engine)
@@ -56,9 +41,13 @@ def initialise_db() -> None:
 
     # Fill all default tables with initial/default data if they are empty
     with SessionLocal.begin() as session:
-        if not session.query(ProductType).count():
+        product_type_count = session.scalar(select(func.count()).select_from(ProductType)) or 0
+        if product_type_count == 0:
             init_product_type_table(session=session)
-        if not session.query(ProductLocation).count():
+        product_location_count = (
+            session.scalar(select(func.count()).select_from(ProductLocation)) or 0
+        )
+        if product_location_count == 0:
             init_product_location_table(session=session)
 
 

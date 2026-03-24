@@ -9,11 +9,17 @@ from typing import Any
 
 from fastapi import FastAPI, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import RedirectResponse
+from fastapi.responses import JSONResponse, RedirectResponse
+from starlette.status import HTTP_400_BAD_REQUEST
 
 from fridge_app_backend.api.routes.inventory_routes import inventory_router
 from fridge_app_backend.api.routes.utils_routes import utils_router
 from fridge_app_backend.config import config
+from fridge_app_backend.exceptions import (
+    InvalidExpiryDateError,
+    InvalidProductLocationError,
+    InvalidProductTypeError,
+)
 from fridge_app_backend.orm.database import initialise_db
 
 logger = logging.getLogger(__name__)
@@ -58,6 +64,31 @@ app = FastAPI(
 
 app.include_router(inventory_router)
 app.include_router(utils_router)
+
+
+# Exception handlers for validation errors
+@app.exception_handler(InvalidProductTypeError)
+async def invalid_product_type_handler(
+    request: Request, exc: InvalidProductTypeError
+) -> JSONResponse:
+    """Handle InvalidProductTypeError by returning HTTP 400."""
+    return JSONResponse(status_code=HTTP_400_BAD_REQUEST, content={"detail": str(exc)})
+
+
+@app.exception_handler(InvalidProductLocationError)
+async def invalid_product_location_handler(
+    request: Request, exc: InvalidProductLocationError
+) -> JSONResponse:
+    """Handle InvalidProductLocationError by returning HTTP 400."""
+    return JSONResponse(status_code=HTTP_400_BAD_REQUEST, content={"detail": str(exc)})
+
+
+@app.exception_handler(InvalidExpiryDateError)
+async def invalid_expiry_date_handler(
+    request: Request, exc: InvalidExpiryDateError
+) -> JSONResponse:
+    """Handle InvalidExpiryDateError by returning HTTP 400."""
+    return JSONResponse(status_code=HTTP_400_BAD_REQUEST, content={"detail": str(exc)})
 
 
 @app.middleware("http")

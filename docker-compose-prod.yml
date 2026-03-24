@@ -1,0 +1,33 @@
+services:
+  nginx:
+    image: nginx:alpine
+    container_name: fridge-app-nginx
+    depends_on:
+      - api
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./certs/raspberrypi.local.pem:/etc/nginx/certs/cert.pem:ro
+      - ./certs/raspberrypi.local-key.pem:/etc/nginx/certs/key.pem:ro
+    restart: unless-stopped
+
+  api:
+    image: ghcr.io/rchretien/fridge-app-backend:latest
+    container_name: fridge-app-api
+    env_file:
+      - .env-prod
+    command: >
+      uv run uvicorn fridge_app_backend.api.app:app --host 0.0.0.0 --port 8000  --root-path /backend
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
+
+  watchtower:
+    image: nickfedor/watchtower:arm64v8-dev
+    container_name: watchtower
+    restart: always
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    env_file:
+      - .env-prod

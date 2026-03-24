@@ -34,3 +34,31 @@ class ModelNotHavingAttributeError(Exception):
     def __init__(self, model_name: str, attribute: str) -> None:
         """Initialise the exception."""
         super().__init__(f"Model {model_name} does not have attribute {attribute}.")
+
+
+class InvalidProductTypeError(ValueError):
+    """Exception raised when an invalid product type is provided."""
+
+    def __init__(self, product_type: str) -> None:
+        """Initialise the exception."""
+        super().__init__(
+            f"Invalid product_type: '{product_type}'. Product type not found in database."
+        )
+
+
+class InvalidProductLocationError(ValueError):
+    """Exception raised when an invalid product location is provided."""
+
+    def __init__(self, product_location: str) -> None:
+        """Initialise the exception."""
+        super().__init__(
+            f"Invalid product_location: '{product_location}'. Product location not found in database."
+        )
+
+
+class InvalidExpiryDateError(ValueError):
+    """Exception raised when expiry date is invalid."""
+
+    def __init__(self, message: str) -> None:
+        """Initialise the exception."""
+        super().__init__(message)

@@ -4,9 +4,10 @@ import re
 from datetime import datetime, timedelta
 from typing import Self
 
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 from fridge_app_backend.config import config
+from fridge_app_backend.exceptions import InvalidExpiryDateError
 from fridge_app_backend.orm.crud.base_crud import PaginatedResponse
 from fridge_app_backend.orm.enums.base_enums import (
     ProductLocationEnum,
@@ -39,6 +40,14 @@ class ProductNameList(BaseModel):
     def from_list(cls, product_names: list[str]) -> Self:
         """Create a ProductNameList instance from a list of product names."""
         return cls(names=[ProductName(name=name) for name in product_names])
+
+
+def _ensure_brussels_timezone(value: datetime) -> datetime:
+    """Return a timezone-aware datetime normalised to the Brussels timezone."""
+    tz = config.brussels_tz
+    if value.tzinfo is None or value.tzinfo.utcoffset(value) is None:
+        return tz.localize(value)
+    return value.astimezone(tz)
 
 
 class ProductBase(BaseModel):
@@ -79,8 +88,54 @@ class ProductCreate(ProductBase):
     """Create product."""
 
 
-class ProductUpdate(ProductBase):
-    """Update product."""
+class ProductUpdate(BaseModel):
+    """Update product - all fields optional for partial updates (PATCH semantics)."""
+
+    product_name: str | None = Field(
+        None,
+        min_length=1,
+        max_length=50,
+        title="Product name",
+        description="Product name",
+        examples=["Filet de poulet"],
+    )
+    description: str | None = Field(
+        None,
+        title="Product description",
+        min_length=1,
+        max_length=256,
+        description="Product description",
+    )
+    quantity: int | None = Field(
+        None, title="Product quantity", ge=1, description="Product quantity"
+    )
+    unit: ProductUnitEnum | None = Field(
+        None, title="Product unit", min_length=1, max_length=50, description="Product unit"
+    )
+    expiry_date: datetime | None = Field(
+        None,
+        title="Product expiry date",
+        description="Product expiry date",
+        examples=[datetime.now(tz=config.brussels_tz) + timedelta(hours=1)],
+    )
+    product_location: ProductLocationEnum | None = Field(
+        None, title="Product location", description="Product location"
+    )
+    product_type: ProductTypeEnum | None = Field(
+        None, title="Product type", description="Product type"
+    )
+
+    def validate_against_existing_product(self, existing_product: Product) -> None:
+        """Validate update data against existing product."""
+        if self.expiry_date is not None:
+            expiry_date = _ensure_brussels_timezone(self.expiry_date)
+            creation_date = _ensure_brussels_timezone(existing_product.creation_date)
+
+            if expiry_date < creation_date:
+                raise InvalidExpiryDateError(
+                    f"Expiry date ({expiry_date.isoformat()}) cannot be earlier than "
+                    f"creation date ({creation_date.isoformat()})"
+                )
 
 
 class ProductRead(ProductBase):
@@ -98,10 +153,7 @@ class ProductRead(ProductBase):
         description="Product image location on the server",
     )
 
-    class Config:
-        """Pydantic configuration."""
-
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
     @classmethod
     def from_model(cls, model: Product) -> Self:
@@ -112,8 +164,8 @@ class ProductRead(ProductBase):
             description=model.description,
             quantity=model.quantity,
             unit=ProductUnitEnum(model.unit),
-            creation_date=model.creation_date,
-            expiry_date=model.expiry_date,
+            creation_date=_ensure_brussels_timezone(model.creation_date),
+            expiry_date=_ensure_brussels_timezone(model.expiry_date),
             product_location=ProductLocationEnum(model.product_location.name),
             product_type=ProductTypeEnum(model.product_type.name),
             image_location=model.image_location,
@@ -147,10 +199,7 @@ class ProductReadList(BaseModel):
         ge=0,
     )
 
-    class Config:
-        """Pydantic configuration."""
-
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
     @classmethod
     def from_paginated_response(cls, paginated_response: PaginatedResponse[Product]) -> Self:

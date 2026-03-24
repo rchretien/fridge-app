@@ -2,7 +2,7 @@
 
 from typing import Self
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 from fridge_app_backend.orm.enums.base_enums import ProductTypeEnum
 from fridge_app_backend.orm.models.db_models import ProductType
@@ -27,10 +27,7 @@ class ProductTypeRead(ProductTypeBase):
 
     id: int = Field(..., title="Product type ID", ge=1)
 
-    class Config:
-        """Pydantic configuration."""
-
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
     @classmethod
     def from_model(cls, product_type: ProductType) -> Self:
@@ -45,10 +42,7 @@ class ProductTypeReadList(BaseModel):
         ..., title="Product types", description="Product type list"
     )
 
-    class Config:
-        """Pydantic configuration."""
-
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
     @classmethod
     def from_db_product_type_list(cls, product_type_list: list[ProductType]) -> Self:

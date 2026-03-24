@@ -1,7 +1,7 @@
 """Base class for CRUD operations."""
 
 from dataclasses import dataclass
-from typing import Generic, TypeVar
+from typing import Any, Generic, TypeVar
 
 from fastapi.encoders import jsonable_encoder
 from pydantic import BaseModel
@@ -50,14 +50,28 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
         """Encode a Pydantic model to a SQLAlchemy model."""
         return self.model(**jsonable_encoder(obj_in))
 
-    def encode_update_model(self, obj_in: UpdateSchemaType, session: Session) -> ModelType:
-        """Encode a Pydantic model to a SQLAlchemy model."""
-        return self.model(**jsonable_encoder(obj_in))
+    def encode_update_model(self, obj_in: UpdateSchemaType, session: Session) -> dict[str, Any]:
+        """Encode a Pydantic model to a dictionary of scalar values for updates."""
+        return obj_in.model_dump(exclude_unset=True)
 
     def get(self, session: Session, row_id: int) -> ModelType | None:
         """Get a single model instance by ID."""
         result: ModelType | None = session.get(self.model, row_id)
         return result
+
+    def _get_order_by_expression(
+        self, order_by: OrderByEnum, ascending: bool = False
+    ) -> ColumnElement[bool]:
+        """Get the order by expression."""
+        if not hasattr(self.model, order_by.value):
+            raise ModelNotHavingAttributeError(
+                model_name=self.model.__name__, attribute=order_by.value
+            )
+        return (  # type: ignore[no-any-return]
+            getattr(self.model, order_by.value).asc()
+            if ascending
+            else getattr(self.model, order_by.value).desc()
+        )
 
     def get_multi_paginated(
         self,
@@ -68,43 +82,28 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
         ascending: bool = False,
         order_by: OrderByEnum = OrderByEnum.ID,
     ) -> PaginatedResponse[ModelType]:
-        """Get multiple model instances."""
+        """Get multiple model instances with pagination."""
+        # Get the order by expression (raises ModelNotHavingAttributeError if invalid)
+        order_by_expression = self._get_order_by_expression(order_by, ascending)
 
-        # Nested function encapsulating the order_by expression definition
-        def _get_order_by_expression() -> ColumnElement[bool]:
-            """Get the order by expression."""
-            if not hasattr(self.model, order_by.value):
-                raise ModelNotHavingAttributeError(
-                    model_name=self.model.__name__, attribute=order_by.value
-                )
-            return (  # type: ignore[no-any-return]
-                getattr(self.model, order_by).asc()
-                if ascending
-                else getattr(self.model, order_by).desc()
-            )
-
-        # Base query statement
-        base_statement = (
-            select(self.model)
-            .order_by(
-                getattr(self.model, order_by.value).asc()
-                if ascending
-                else getattr(self.model, order_by.value).desc()
-            )
-            .offset(offset)
-            .limit(limit)
+        # Build the data query with ordering, offset, and limit
+        data_statement = (
+            select(self.model).order_by(order_by_expression).offset(offset).limit(limit)
         )
 
+        # Count total records directly from the base model (more efficient)
+        count_statement = select(func.count()).select_from(self.model)
+
         return PaginatedResponse(
-            data=list(session.scalars(base_statement).all()),
-            total=session.scalar(select(func.count()).select_from(base_statement.subquery())) or 0,
+            data=list(session.scalars(data_statement).all()),
+            total=session.scalar(count_statement) or 0,
             offset=offset,
             limit=limit,
         )
 
     def get_all(self, session: Session) -> list[ModelType]:
         """Get all model instances."""
-        return session.query(self.model).all()
+        return list(session.scalars(select(self.model)).all())
 
     def create(self, session: Session, obj_in: CreateSchemaType) -> ModelType:
         """Create a new database record."""
@@ -133,7 +132,7 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
 
         # Check if all fields are present in the object
         update_data = self.encode_update_model(obj_in, session)
-        for field, value in update_data.__dict__.items():
+        for field, value in update_data.items():
             if hasattr(db_obj, field):
                 setattr(db_obj, field, value)
 

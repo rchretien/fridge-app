@@ -74,7 +74,84 @@ The API will connect to the PostgreSQL database using the .env-dev configuration
 
 ### 5. Stop the database when finished
 ```
-docker compose --profile postgres down`
+docker compose --profile postgres down
+```
+
+## 🛠️ Automatic Deployment with Watchtower
+
+To keep the Raspberry Pi deployment up-to-date, the project uses Watchtower, a lightweight tool that automatically pulls new Docker images and restarts the corresponding containers.
+
+This allows the Raspberry Pi to update itself whenever a new version of the API image is published to the container registry.
+
+### 🚀 What Watchtower Does
+
+Watchtower runs in a dedicated container and:
+
+1. Periodically checks the registry for new versions of your Docker images.
+
+2. If an update is found:
+
+    - pulls the new image
+    - stops the old container 
+    - restarts the container using the updated image (with the same configuration)
+    - removes old images (when cleanup is enabled)
+
+Thanks to this, no manual SSH deployment is required.
+
+### 🧩 Watchtower Configuration
+
+Example service definition in docker-compose.yml:
+```
+watchtower:
+  image: nickfedor/watchtower:latest
+  restart: always
+  environment:
+    WATCHTOWER_SCHEDULE: "0 3 * * *"
+    WATCHTOWER_CLEANUP: "true"
+  volumes:
+    - /var/run/docker.sock:/var/run/docker.sock
+```
+
+#### Explanation of the settings
+
+| Variable | 	Description |
+|----------|--------------|
+|WATCHTOWER_SCHEDULE	|Cron expression defining when updates should be checked. "0 3 * * *" → every day at 03:00.|
+|WATCHTOWER_CLEANUP	|Deletes old images after updating to save disk space.|
+|/var/run/docker.sock	|Required so Watchtower can control Docker and restart containers.
+
+### 🕒 Scheduling Updates
+
+Watchtower supports two modes:
+
+#### Option 1 — Cron schedule (recommended)
+```
+WATCHTOWER_SCHEDULE="0 3 * * *"
+```
+Runs a single check every day at 03:00.
+
+#### Option 2 — Interval checks (for development)
+```
+WATCHTOWER_POLL_INTERVAL=300
+
+```
+Runs every 5 minutes.
+➡️ Do not use both polling and schedule at the same time.
+
+### 🔍 Checking Watchtower Logs
+
+To follow update cycles:
+```
+docker compose logs -f watchtower
+```
+
+Example output when an update is detected:
+```
+Found new image ghcr.io/...:dev
+Stopping container
+Started new container
+Removing old image
+Update session completed: scanned=1 updated=1
 ```
 
 ## Contributing

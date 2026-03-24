@@ -7,8 +7,8 @@ from fastapi.responses import Response
 from starlette.status import HTTP_200_OK, HTTP_201_CREATED, HTTP_204_NO_CONTENT, HTTP_404_NOT_FOUND
 
 from fridge_app_backend.api.dependencies.product_dependencies import (
-    ProductDependency,
     SessionDependency,
+    ValidatedProductUpdateDependency,
 )
 from fridge_app_backend.orm.crud.product_crud import product_crud
 from fridge_app_backend.orm.enums.base_enums import OrderByEnum
@@ -20,7 +20,6 @@ from fridge_app_backend.orm.schemas.product_schemas import (
     ProductNameList,
     ProductRead,
     ProductReadList,
-    ProductUpdate,
 )
 
 inventory_router = APIRouter(prefix="/inventory", tags=["Inventory"])
@@ -87,12 +86,10 @@ async def get_product_names_starting_with(
     status_code=HTTP_200_OK,
 )
 async def update_product(
-    product_id: int,
-    product_update: ProductUpdate,
-    product: ProductDependency,
-    session: SessionDependency,
+    product_id: int, validated_data: ValidatedProductUpdateDependency, session: SessionDependency
 ) -> ProductRead:
     """Update a product."""
+    _, product_update = validated_data
     return ProductRead.from_model(
         product_crud.update(session=session, row_id=product_id, obj_in=product_update)
     )

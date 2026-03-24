@@ -2,7 +2,7 @@
 
 from typing import Self
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 from fridge_app_backend.orm.enums.base_enums import ProductLocationEnum
 from fridge_app_backend.orm.models.db_models import ProductLocation
@@ -29,10 +29,7 @@ class ProductLocationRead(ProductLocationBase):
 
     id: int = Field(..., title="Product location ID", ge=1)
 
-    class Config:
-        """Pydantic configuration."""
-
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
     @classmethod
     def from_model(cls, product_location: ProductLocation) -> Self:
