@@ -28,28 +28,26 @@ This is a CRUD (Create, Read, Update, Delete) REST API that manages a fridge inv
 ### Project Structure
 ```
 fridge-app-backend/
-├── src/fridge_app_backend/          # Main application package
-│   ├── api/                          # API layer
-│   │   ├── routes/                   # API endpoint definitions
-│   │   │   ├── inventory_routes.py  # Product CRUD endpoints
-│   │   │   └── utils_routes.py      # Utility endpoints
-│   │   └── dependencies/             # FastAPI dependencies
-│   │       └── product_dependencies.py
-│   ├── orm/                          # Database layer
-│   │   ├── crud/                     # CRUD operations
-│   │   │   ├── base_crud.py         # Generic CRUD base class
-│   │   │   └── product_crud.py      # Product-specific CRUD
-│   │   ├── models/                   # SQLAlchemy models
-│   │   │   └── db_models.py         # Database table definitions
-│   │   ├── schemas/                  # Pydantic schemas
-│   │   │   └── product_schemas.py   # Request/response models
-│   │   ├── enums/                    # Enumeration types
-│   │   └── database.py               # Database engine & session management
-│   ├── config.py                     # Configuration management
-│   └── exceptions.py                 # Custom exceptions
-├── tests/                            # Test suite
-├── pyproject.toml                    # Project dependencies & config
-└── docker-compose.yml                # Container orchestration
+├── apps/
+│   └── api/
+│       ├── src/fridge_app_backend/   # Main application package
+│       │   ├── api/                  # API layer
+│       │   │   ├── routes/           # API endpoint definitions
+│       │   │   └── dependencies/     # FastAPI dependencies
+│       │   ├── orm/                  # Database layer
+│       │   │   ├── crud/             # CRUD operations
+│       │   │   ├── models/           # SQLAlchemy models
+│       │   │   ├── schemas/          # Pydantic schemas
+│       │   │   ├── enums/            # Enumeration types
+│       │   │   └── database.py       # Database engine & session management
+│       │   ├── config.py             # Configuration management
+│       │   └── exceptions.py         # Custom exceptions
+│       ├── tests/                    # Test suite
+│       ├── pyproject.toml            # Backend dependencies & config
+│       ├── Dockerfile                # Backend container image
+│       └── mkdocs.yml                # Backend documentation config
+├── docker-compose.yml                # Workspace orchestration
+└── AGENTS.md
 ```
 
 ### Key Design Patterns
@@ -107,26 +105,26 @@ fridge-app-backend/
 ### Running the Application
 ```bash
 # Development mode (with hot reload)
-uv run poe api --dev
+uv run --directory apps/api poe api --dev
 
 # Production mode
-uv run poe api
+uv run --directory apps/api poe api
 
 # Custom host/port
-uv run poe api --host 0.0.0.0 --port 8080 --dev
+uv run --directory apps/api poe api --host 0.0.0.0 --port 8080 --dev
 ```
 
 ### Testing
 ```bash
-uv run poe test        # Run tests with coverage
-uv run poe lint        # Run linters and formatters
+uv run --directory apps/api poe test        # Run tests with coverage
+uv run --directory apps/api poe lint        # Run linters and formatters
 ```
 
 ### Key Poe Tasks (defined in pyproject.toml)
-- `uv run poe api`: Start the API server
-- `uv run poe test`: Run test suite with coverage
-- `uv run poe lint`: Run pre-commit hooks
-- `uv run poe docs`: Build/serve documentation with MkDocs
+- `uv run --directory apps/api poe api`: Start the API server
+- `uv run --directory apps/api poe test`: Run test suite with coverage
+- `uv run --directory apps/api poe lint`: Run pre-commit hooks
+- `uv run --directory apps/api poe docs`: Build/serve documentation with MkDocs
 
 ---
 

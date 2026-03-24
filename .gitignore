@@ -1,6 +1,6 @@
 # Coverage.py
 htmlcov/
-reports/
+apps/api/reports/
 
 # Copier
 *.rej
@@ -34,7 +34,7 @@ notebooks/
 mise.local.toml
 
 # MkDocs
-site/
+apps/api/site/
 
 # mypy
 .dmypy.json
@@ -57,6 +57,7 @@ __pycache__/
 *.egg-info/
 *.py[cdo]
 .venv/
+apps/api/.venv/
 dist/
 
 # Ruff

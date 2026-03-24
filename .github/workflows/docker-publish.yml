@@ -58,12 +58,13 @@ jobs:
         id: push
         uses: docker/build-push-action@f2a1d5e99d037542a71f64918e516c093c6f3fc4
         with:
-          context: .
-          file: ./src/fridge_app_backend/Dockerfile
+          context: ./apps/api
+          file: ./apps/api/Dockerfile
           push: true
           platforms: linux/amd64,linux/arm64
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+          target: app
 
       - name: Generate artifact attestation
         uses: actions/attest-build-provenance@v3
