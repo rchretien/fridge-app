@@ -38,13 +38,14 @@ services:
       uv run uvicorn fridge_app_backend.api.app:app --host 0.0.0.0 --port 8000
 
   devcontainer:
+    image: fridge-app-backend-devcontainer
     build:
+      context: .
+      dockerfile: ./Dockerfile
       target: dev
     volumes:
       - .:/workspaces/fridge-app-backend
       - command-history-volume:/home/user/.history/
-    profiles:
-      - devcontainer
 
   app:
     build:
