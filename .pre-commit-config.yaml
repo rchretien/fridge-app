@@ -47,29 +47,28 @@ repos:
     hooks:
       - id: uv-lock-check
         name: uv lock check
-        entry: uv lock
-        args: ["--check"]
+        entry: uv
+        args: ["lock", "--check"]
         require_serial: true
         language: system
         pass_filenames: false
       - id: ruff-check
         name: ruff check
-        entry: ruff check
-        args: ["--force-exclude", "--extend-fixable=ERA001,F401,F841,T201,T203", "--fix-only"]
+        entry: uv
+        args: ["run", "--directory", "apps/api", "ruff", "check", "--force-exclude", "--extend-fixable=ERA001,F401,F841,T201,T203", "--fix-only", "src", "tests"]
         require_serial: true
         language: system
-        types_or: [python, pyi]
+        pass_filenames: false
       - id: ruff-format
         name: ruff format
-        entry: ruff format
-        args: [--force-exclude]
+        entry: uv
+        args: ["run", "--directory", "apps/api", "ruff", "format", "--force-exclude", "src", "tests"]
         require_serial: true
         language: system
-        types_or: [python, pyi]
+        pass_filenames: false
       - id: mypy
         name: mypy
-        entry: mypy
-        args: ["src"]
+        entry: uv
+        args: ["run", "--directory", "apps/api", "mypy", "src"]
         language: system
-        types: [python]
         pass_filenames: false

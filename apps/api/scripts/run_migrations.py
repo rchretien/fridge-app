@@ -1,6 +1,7 @@
 """Alembic migration scripts."""
 
 import logging
+from pathlib import Path
 
 from alembic import command
 from alembic.config import Config
@@ -13,7 +14,7 @@ def run_migrations() -> None:
     """Run Alembic migrations for persistent databases."""
     try:
         logger.info("Running database migrations...")
-        alembic_cfg = Config("alembic.ini")
+        alembic_cfg = Config(str(Path(__file__).resolve().parents[1] / "alembic.ini"))
         command.upgrade(alembic_cfg, "head")
         logger.info("Database migrations completed successfully")
     except Exception as e:

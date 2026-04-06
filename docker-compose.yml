@@ -11,18 +11,18 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U ${DB_USER:-fridge_dev}" ]
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-fridge_dev}"]
       interval: 5s
       timeout: 5s
       retries: 5
     profiles:
       - postgres
 
-  # FastAPI application
   api:
     build:
-      context: .
-      dockerfile: ./src/fridge_app_backend/Dockerfile
+      context: ./apps/api
+      dockerfile: Dockerfile
+      target: app
     container_name: fridge-app-api
     env_file:
       - path: .env-dev
@@ -34,14 +34,13 @@ services:
         condition: service_healthy
     profiles:
       - dev
-    command: >
-      uv run uvicorn fridge_app_backend.api.app:app --host 0.0.0.0 --port 8000
+    command: ["api", "--dev", "--host", "0.0.0.0", "--port", "8000"]
 
   devcontainer:
     image: fridge-app-backend-devcontainer
     build:
       context: .
-      dockerfile: ./Dockerfile
+      dockerfile: apps/api/Dockerfile
       target: dev
     volumes:
       - .:/workspaces/fridge-app-backend
@@ -49,7 +48,11 @@ services:
 
   app:
     build:
+      context: ./apps/api
+      dockerfile: Dockerfile
       target: app
+    ports:
+      - "8000:8000"
     profiles:
       - app
 

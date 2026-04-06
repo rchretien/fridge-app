@@ -52,7 +52,7 @@ RUN groupadd --gid 1000 user && \
 USER user
 
 # Set the working directory.
-WORKDIR /workspaces/fridge-app-backend/
+WORKDIR /workspace/app
 
 # Copy the app source code to the working directory.
 COPY --chown=user:user . .
@@ -71,5 +71,5 @@ RUN --mount=type=cache,uid=1000,gid=1000,target=/home/user/.cache/uv \
     --python-preference only-system
 
 # Expose the app.
-ENTRYPOINT ["/workspaces/fridge-app-backend/.venv/bin/poe"]
+ENTRYPOINT ["/workspace/app/.venv/bin/poe"]
 CMD ["api"]
