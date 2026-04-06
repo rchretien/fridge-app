@@ -43,7 +43,7 @@ services:
       dockerfile: apps/api/Dockerfile
       target: dev
     volumes:
-      - .:/workspaces/fridge-app
+      - .:/workspaces/fridge-app-backend
       - command-history-volume:/home/user/.history/
 
   app:
