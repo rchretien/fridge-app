@@ -2,10 +2,10 @@ _commit: v1.6.0
 _src_path: gh:superlinear-ai/substrate
 author_email: rchretien@outlook.be
 author_name: Renaud
-project_description: Backend for a fridge inventory application 
-project_name: Fridge App Backend
+project_description: Workspace for the fridge inventory application
+project_name: Fridge App Workspace
 project_type: app
-project_url: https://github.com/rchretien/fridge-app-backend
+project_url: https://github.com/rchretien/fridge-app
 python_version: '3.13'
 typing: optional
 with_conventional_commits: false

@@ -1,8 +1,8 @@
 site_name: Fridge App Backend API Documentation
 site_description: API documentation for the Fridge App Backend project.
-site_url: https://rchretien.github.com.github.io/fridge-app-backend
-repo_url: https://rchretien.github.com/fridge-app-backend
-repo_name: rchretien.github.com/fridge-app-backend
+site_url: https://rchretien.github.io/fridge-app
+repo_url: https://github.com/rchretien/fridge-app
+repo_name: rchretien/fridge-app
 
 theme:
   name: material
