@@ -1,5 +1,5 @@
 {
-    "name": "fridge-app-backend",
+    "name": "fridge-app-workspace",
     "dockerComposeFile": "../docker-compose.yml",
     "service": "devcontainer",
     "workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}/",

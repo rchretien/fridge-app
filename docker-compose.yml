@@ -37,13 +37,13 @@ services:
     command: ["api", "--dev", "--host", "0.0.0.0", "--port", "8000"]
 
   devcontainer:
-    image: fridge-app-backend-devcontainer
+    image: fridge-app-devcontainer
     build:
       context: .
       dockerfile: apps/api/Dockerfile
       target: dev
     volumes:
-      - .:/workspaces/fridge-app-backend
+      - .:/workspaces/fridge-app
       - command-history-volume:/home/user/.history/
 
   app:

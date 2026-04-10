@@ -6,12 +6,12 @@
 
 ## 📋 Project Overview
 
-**Project Name**: Fridge App Backend  
-**Type**: REST API Backend  
+**Project Name**: Fridge App Workspace  
+**Type**: Multi-app workspace  
 **Primary Language**: Python 3.13+  
 **Framework**: FastAPI  
 **Database**: SQLAlchemy ORM (SQLite in-memory for dev, configurable for production)  
-**Purpose**: Backend API for managing a fridge inventory system
+**Purpose**: Workspace for the fridge inventory application, currently hosting the backend API and prepared to host a frontend
 
 ### What This Application Does
 This is a CRUD (Create, Read, Update, Delete) REST API that manages a fridge inventory. Users can:
@@ -27,10 +27,10 @@ This is a CRUD (Create, Read, Update, Delete) REST API that manages a fridge inv
 
 ### Project Structure
 ```
-fridge-app-backend/
+fridge-app/
 ├── apps/
 │   └── api/
-│       ├── src/fridge_app_backend/   # Main application package
+│       ├── src/fridge_app_backend/   # Main backend package
 │       │   ├── api/                  # API layer
 │       │   │   ├── routes/           # API endpoint definitions
 │       │   │   └── dependencies/     # FastAPI dependencies

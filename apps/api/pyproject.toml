@@ -30,11 +30,11 @@ dependencies = [
 ]
 
 [project.urls]  # https://packaging.python.org/en/latest/specifications/well-known-project-urls/#well-known-labels
-homepage = "https://rchretien.github.com/fridge-app-backend"
-source = "https://rchretien.github.com/fridge-app-backend"
-releasenotes = "https://rchretien.github.com/fridge-app-backend/releases"
-documentation = "https://rchretien.github.com.github.io/fridge-app-backend"
-issues = "https://rchretien.github.com/fridge-app-backend/issues"
+homepage = "https://rchretien.github.com/fridge-app"
+source = "https://rchretien.github.com/fridge-app"
+releasenotes = "https://rchretien.github.com/fridge-app/releases"
+documentation = "https://rchretien.github.io/fridge-app"
+issues = "https://rchretien.github.com/fridge-app/issues"
 
 [dependency-groups]  # https://docs.astral.sh/uv/concepts/projects/dependencies/#development-dependencies
 dev = [
