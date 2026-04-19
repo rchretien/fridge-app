@@ -33,9 +33,11 @@ def _product_payload(**overrides: Any) -> dict[str, Any]:
 
 
 def test_read_root(client: TestClient) -> None:
-    """Test that reading the root is successful."""
+    """Test that reading the root returns the inventory HTML app."""
     response = client.get("/")
     assert httpx.codes.is_success(response.status_code)
+    assert response.headers["content-type"].startswith("text/html")
+    assert "Quick search, quick add, quick action." in response.text
 
 
 def test_create_product_and_list(client: TestClient) -> None:
@@ -105,3 +107,39 @@ def test_create_product_with_missing_type_returns_400(client: TestClient) -> Non
     assert "Invalid product_type" in detail
     assert "ProductTypeEnum.FRUIT" in detail
     assert "Product type not found in database." in detail
+
+
+def test_create_product_with_past_expiry_returns_400(client: TestClient) -> None:
+    """Creating a product with an expiry date before now must fail cleanly."""
+    payload = _product_payload(
+        expiry_date=(datetime.now(tz=config.brussels_tz) - timedelta(hours=1)).isoformat()
+    )
+
+    response = client.post("/inventory/create", json=payload)
+
+    assert response.status_code == httpx.codes.BAD_REQUEST
+    assert "cannot be earlier than creation date" in response.json()["detail"]
+
+
+def test_delete_product_removes_record(client: TestClient) -> None:
+    """Deleting a product via the JSON API should remove it from the database."""
+    payload = _product_payload(product_name="Delete me")
+    create_response = client.post("/inventory/create", json=payload)
+    assert create_response.status_code == httpx.codes.CREATED
+
+    product_id = create_response.json()["product_id"]
+    delete_response = client.delete("/inventory/delete", params={"product_id": product_id})
+
+    assert delete_response.status_code == httpx.codes.NO_CONTENT
+
+    list_response = client.get("/inventory/list")
+    assert list_response.status_code == httpx.codes.OK
+    assert list_response.json()["total"] == 0
+
+
+def test_delete_unknown_product_returns_404(client: TestClient) -> None:
+    """Deleting a missing product should return a 404 response."""
+    response = client.delete("/inventory/delete", params={"product_id": 999})
+
+    assert response.status_code == httpx.codes.NOT_FOUND
+    assert response.json()["detail"] == "Product not found in the database."

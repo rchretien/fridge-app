@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+
+{% block title %}Inventory · FrozenVault{% endblock %}
+
+{% block content %}
+  <section class="screen-stack">
+    <section class="inventory-page-header panel" aria-label="Inventory header">
+      <div>
+        <p class="eyebrow">Inventory management</p>
+        <h2 class="screen-headline">Work from the full fridge table.</h2>
+        <p class="hero-copy">Sort, filter, and scan every product in one place. Use the welcome page for the overview, and this page for the actual management work.</p>
+      </div>
+      <div class="inventory-page-actions">
+        <div class="metric-pill is-primary compact-metric">
+          <span class="metric-label">Tracked items</span>
+          <strong>{{ total }}</strong>
+        </div>
+        <a class="quick-add-fab" href="{{ request.url_for('new_product_page') }}">
+          {% set icon_name = 'plus' %}
+          {% set icon_class = 'app-icon app-icon-sm' %}
+          {% include 'partials/_heroicon.html' %}
+          <span>Add product</span>
+        </a>
+      </div>
+    </section>
+
+    {% include 'inventory/_toolbar.html' %}
+    {% include 'inventory/_product_list.html' %}
+  </section>
+{% endblock %}

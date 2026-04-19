@@ -1,14 +1,15 @@
 """CRUD operations for the product model."""
 
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Any
 
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from fridge_app_backend.config import config
 from fridge_app_backend.exceptions import InvalidProductLocationError, InvalidProductTypeError
 from fridge_app_backend.orm.crud.base_crud import CRUDBase
+from fridge_app_backend.orm.enums.base_enums import OrderByEnum
 from fridge_app_backend.orm.models.db_models import Product, ProductLocation, ProductType
 from fridge_app_backend.orm.schemas.product_schemas import ProductCreate, ProductUpdate
 
@@ -72,6 +73,67 @@ class CRUDProduct(CRUDBase[Product, ProductCreate, ProductUpdate]):
             select(Product.name).where(Product.name.ilike(f"{product_name}%"))
         )
         return list(scalar_result.all())
+
+    def get_multi_filtered_paginated(
+        self,
+        session: Session,
+        *,
+        limit: int = 100,
+        offset: int = 0,
+        name_prefix: str | None = None,
+        product_location: str | None = None,
+        product_type: str | None = None,
+        urgency: str | None = None,
+        ascending: bool = False,
+        order_by: OrderByEnum = OrderByEnum.ID,
+    ) -> Any:
+        """Get products filtered by name prefix, location, and type with pagination."""
+        order_by_expression = self._get_order_by_expression(order_by, ascending)
+
+        data_statement = select(self.model)
+        count_statement = select(func.count()).select_from(self.model)
+
+        if product_type:
+            data_statement = data_statement.join(self.model.product_type)
+            count_statement = count_statement.join(self.model.product_type)
+            data_statement = data_statement.where(ProductType.name == product_type)
+            count_statement = count_statement.where(ProductType.name == product_type)
+
+        if product_location:
+            data_statement = data_statement.join(self.model.product_location)
+            count_statement = count_statement.join(self.model.product_location)
+            data_statement = data_statement.where(ProductLocation.name == product_location)
+            count_statement = count_statement.where(ProductLocation.name == product_location)
+
+        if name_prefix:
+            prefix = name_prefix.strip()
+            if prefix:
+                data_statement = data_statement.where(self.model.name.ilike(f"{prefix}%"))
+                count_statement = count_statement.where(self.model.name.ilike(f"{prefix}%"))
+
+        if urgency in {"soon", "expired"}:
+            current_time = datetime.now(tz=config.brussels_tz).replace(tzinfo=None)
+            if urgency == "expired":
+                data_statement = data_statement.where(self.model.expiry_date < current_time)
+                count_statement = count_statement.where(self.model.expiry_date < current_time)
+            else:
+                threshold = (datetime.now(tz=config.brussels_tz) + timedelta(days=3)).replace(
+                    tzinfo=None
+                )
+                data_statement = data_statement.where(self.model.expiry_date >= current_time)
+                data_statement = data_statement.where(self.model.expiry_date <= threshold)
+                count_statement = count_statement.where(self.model.expiry_date >= current_time)
+                count_statement = count_statement.where(self.model.expiry_date <= threshold)
+
+        data_statement = data_statement.order_by(order_by_expression).offset(offset).limit(limit)
+
+        return self._build_paginated_response(
+            session=session,
+            data_statement=data_statement,
+            count_statement=count_statement,
+            offset=offset,
+            limit=limit,
+        )
 
 
 product_crud = CRUDProduct(Product)

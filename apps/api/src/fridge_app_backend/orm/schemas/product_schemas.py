@@ -62,11 +62,7 @@ class ProductBase(BaseModel):
         examples=["Filet de poulet"],
     )
     description: str = Field(
-        ...,
-        title="Product description",
-        min_length=1,
-        max_length=256,
-        description="Product description",
+        default="", title="Product description", max_length=256, description="Product description"
     )
     quantity: int = Field(..., title="Product quantity", ge=1, description="Product quantity")
     unit: ProductUnitEnum = Field(
@@ -87,6 +83,17 @@ class ProductBase(BaseModel):
 class ProductCreate(ProductBase):
     """Create product."""
 
+    def validate_against_creation_date(self, creation_date: datetime) -> None:
+        """Validate create data against the creation date that will be persisted."""
+        expiry_date = _ensure_brussels_timezone(self.expiry_date)
+        created_at = _ensure_brussels_timezone(creation_date)
+
+        if expiry_date < created_at:
+            raise InvalidExpiryDateError(
+                f"Expiry date ({expiry_date.isoformat()}) cannot be earlier than "
+                f"creation date ({created_at.isoformat()})"
+            )
+
 
 class ProductUpdate(BaseModel):
     """Update product - all fields optional for partial updates (PATCH semantics)."""
@@ -100,11 +107,7 @@ class ProductUpdate(BaseModel):
         examples=["Filet de poulet"],
     )
     description: str | None = Field(
-        None,
-        title="Product description",
-        min_length=1,
-        max_length=256,
-        description="Product description",
+        None, title="Product description", max_length=256, description="Product description"
     )
     quantity: int | None = Field(
         None, title="Product quantity", ge=1, description="Product quantity"

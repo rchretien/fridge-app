@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+
+{% block title %}More · FrozenVault{% endblock %}
+
+{% block content %}
+  <section class="screen-stack">
+    <section class="utility-sheet">
+      <div class="utility-sheet-header">
+        <p class="eyebrow">Utilities</p>
+        <h2 class="section-title">Tools</h2>
+      </div>
+
+      <a class="utility-row" href="/docs">
+        <div>
+          <strong>API documentation</strong>
+          <p class="muted-text">Open the backend API reference.</p>
+        </div>
+        {% set icon_name = 'arrow-top-right-on-square' %}
+        {% set icon_class = 'row-chevron' %}
+        {% include 'partials/_heroicon.html' %}
+      </a>
+    </section>
+
+    <section class="utility-sheet">
+      <div class="utility-sheet-header">
+        <p class="eyebrow">Planned</p>
+        <h2 class="section-title">Future shortcuts</h2>
+      </div>
+
+      <div class="utility-row is-disabled">
+        <div>
+          <strong>Capture photo</strong>
+          <p class="muted-text">Attach a photo while adding an item.</p>
+        </div>
+        <div class="utility-row-meta">
+          {% set icon_name = 'camera' %}
+          {% set icon_class = 'app-icon app-icon-sm utility-row-icon' %}
+          {% include 'partials/_heroicon.html' %}
+          <span class="row-badge">Soon</span>
+        </div>
+      </div>
+
+      <div class="utility-row is-disabled">
+        <div>
+          <strong>Scan barcode</strong>
+          <p class="muted-text">Use the camera to speed up item entry.</p>
+        </div>
+        <div class="utility-row-meta">
+          {% set icon_name = 'qr-code' %}
+          {% set icon_class = 'app-icon app-icon-sm utility-row-icon' %}
+          {% include 'partials/_heroicon.html' %}
+          <span class="row-badge">Soon</span>
+        </div>
+      </div>
+    </section>
+  </section>
+{% endblock %}

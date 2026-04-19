@@ -1,0 +1,17 @@
+{% if flash %}
+  <section class="flash flash-{{ flash_level }}">
+    <div class="flash-icon" aria-hidden="true">
+      {% if flash_level == 'error' %}
+        {% set icon_name = 'x-circle' %}
+      {% else %}
+        {% set icon_name = 'check-circle' %}
+      {% endif %}
+      {% set icon_class = 'app-icon app-icon-lg' %}
+      {% include 'partials/_heroicon.html' %}
+    </div>
+    <div class="flash-copy">
+      <strong>{% if flash_level == 'error' %}Something needs attention{% else %}Update saved{% endif %}</strong>
+      <p>{{ flash }}</p>
+    </div>
+  </section>
+{% endif %}

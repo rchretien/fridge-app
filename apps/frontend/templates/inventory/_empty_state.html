@@ -1,0 +1,48 @@
+<section class="empty-state panel">
+  <div class="empty-state-visual" aria-hidden="true">
+    <svg viewBox="0 0 160 120" role="presentation">
+      <rect x="38" y="12" width="84" height="96" rx="24" fill="#dce8ff"/>
+      <rect x="48" y="24" width="64" height="72" rx="18" fill="#ffffff"/>
+      <rect x="48" y="58" width="64" height="3" rx="1.5" fill="#dce8ff"/>
+      <circle cx="68" cy="42" r="8" fill="#ffc76d"/>
+      <path d="M92 40h12M92 48h10" fill="none" stroke="#9ab6e8" stroke-linecap="round" stroke-width="4"/>
+      <path d="M54 84c7-8 17-12 30-12 11 0 21 3 29 10" fill="none" stroke="#ff9fb3" stroke-linecap="round" stroke-width="5"/>
+    </svg>
+  </div>
+
+  <p class="eyebrow">No results</p>
+  <h3>
+    {% if filters.q or filters.product_type or filters.product_location %}
+      No products match these filters.
+    {% elif active_nav == 'soon' %}
+      Nothing urgent right now.
+    {% else %}
+      Your inventory is empty.
+    {% endif %}
+  </h3>
+  <p class="muted-text">
+    {% if filters.q or filters.product_type or filters.product_location %}
+      Try broadening the search, or reset the view to see everything again.
+    {% elif active_nav == 'soon' %}
+      Good news. Nothing in the current range needs immediate attention.
+    {% else %}
+      Start by adding a few staples so the dashboard has something useful to show.
+    {% endif %}
+  </p>
+  <div class="empty-state-actions">
+    <a class="primary-button" href="{{ request.url_for('new_product_page') }}">
+      {% set icon_name = 'plus' %}
+      {% set icon_class = 'app-icon app-icon-sm' %}
+      {% include 'partials/_heroicon.html' %}
+      <span>Add product</span>
+    </a>
+    {% if filters.q or filters.product_type or filters.product_location or filters.sort != 'newest' %}
+      <a class="secondary-button" href="{{ request.url_for('inventory_home') if active_nav == 'inventory' else request.url_for('inventory_soon') }}">
+        {% set icon_name = 'arrow-path' %}
+        {% set icon_class = 'app-icon app-icon-sm' %}
+        {% include 'partials/_heroicon.html' %}
+        <span>Reset view</span>
+      </a>
+    {% endif %}
+  </div>
+</section>

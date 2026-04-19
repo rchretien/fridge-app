@@ -1,0 +1,167 @@
+{% extends 'base.html' %}
+
+{% block title %}Welcome · FrozenVault{% endblock %}
+
+{% block content %}
+  <section class="screen-stack">
+    <section class="screen-summary home-summary" aria-label="Welcome dashboard">
+      <div class="summary-copy-block">
+        <p class="eyebrow">Welcome back</p>
+        <h2 class="screen-headline">Run the fridge from one calm dashboard.</h2>
+        <p class="hero-copy">Check what is expiring, jump into the full inventory grid, and add products without landing straight in the management view.</p>
+
+        <div class="home-action-row">
+          <a class="primary-button" href="{{ request.url_for('new_product_page') }}">
+            {% set icon_name = 'plus' %}
+            {% set icon_class = 'app-icon app-icon-sm' %}
+            {% include 'partials/_heroicon.html' %}
+            <span>Add product</span>
+          </a>
+          <a class="secondary-button" href="{{ request.url_for('inventory_home') }}">
+            <span>Open inventory</span>
+          </a>
+        </div>
+      </div>
+
+      <div class="summary-side">
+        {% include 'partials/_inventory_visual.html' %}
+
+        <div class="top-metrics">
+          <div class="metric-pill is-primary">
+            <span class="metric-label">Tracked items</span>
+            <strong>{{ total }}</strong>
+          </div>
+          <div class="metric-pill urgency-pill {% if expired_count > 0 %}is-danger{% elif soon_count > 0 %}is-warning{% endif %}">
+            <span class="metric-label">Need attention</span>
+            <strong>{{ soon_count + expired_count }}</strong>
+          </div>
+          <div class="metric-pill">
+            <span class="metric-label">Fresh later</span>
+            <strong>{{ fresh_count }}</strong>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="home-shortcuts panel">
+      <div class="home-shortcuts-header">
+        <div>
+          <p class="eyebrow">Shortcuts</p>
+          <h3 class="section-title">Jump into the right view</h3>
+        </div>
+      </div>
+
+      <div class="home-shortcut-grid">
+        <a class="home-shortcut-card" href="{{ request.url_for('inventory_home') }}">
+          {% set icon_name = 'squares-2x2' %}
+          {% set icon_class = 'app-icon app-icon-md' %}
+          {% include 'partials/_heroicon.html' %}
+          <strong>Inventory grid</strong>
+          <p class="muted-text">Full table view for sorting, scanning, and managing products.</p>
+        </a>
+        <a class="home-shortcut-card" href="{{ request.url_for('inventory_soon') }}">
+          {% set icon_name = 'clock' %}
+          {% set icon_class = 'app-icon app-icon-md' %}
+          {% include 'partials/_heroicon.html' %}
+          <strong>Expiring soon</strong>
+          <p class="muted-text">Focus only on items that need to be used in the next few days.</p>
+        </a>
+        <a class="home-shortcut-card" href="{{ request.url_for('new_product_page') }}">
+          {% set icon_name = 'plus' %}
+          {% set icon_class = 'app-icon app-icon-md' %}
+          {% include 'partials/_heroicon.html' %}
+          <strong>Add product</strong>
+          <p class="muted-text">Capture a new item fast, with date-only expiry and simple units.</p>
+        </a>
+      </div>
+    </section>
+
+    <div class="home-grid">
+      <section class="panel home-panel">
+        <div class="home-panel-header">
+          <div>
+            <p class="eyebrow">Urgent first</p>
+            <h3 class="section-title">What needs action</h3>
+          </div>
+          <a class="utility-link" href="{{ request.url_for('inventory_soon') }}">
+            {% set icon_name = 'clock' %}
+            {% set icon_class = 'app-icon app-icon-sm' %}
+            {% include 'partials/_heroicon.html' %}
+            <span>Open soon view</span>
+          </a>
+        </div>
+
+        {% if urgent_preview %}
+          <div class="home-list">
+            {% for product in urgent_preview %}
+              {% set type_visual = product_type_visual(product.product_type) %}
+              {% set product_status = expiry_status(product.expiry_date) %}
+              <a class="home-list-row tone-{{ type_visual.tone }}" href="{{ request.url_for('edit_product_page', product_id=product.id) }}">
+                <span class="product-card-icon home-list-icon" aria-hidden="true">
+                  {% include 'partials/_product_type_icon.html' %}
+                </span>
+                <div class="home-list-copy">
+                  <strong>{{ product.product_name }}</strong>
+                  <p class="muted-text">{{ product_location_label(product.product_location) }} · {{ product.quantity }} {{ product_unit_label(product.unit) }}</p>
+                </div>
+                <span class="inventory-status-badge {{ product_status }}">{{ expiry_status_label(product.expiry_date) }}</span>
+              </a>
+            {% endfor %}
+          </div>
+        {% else %}
+          <div class="home-empty-note">
+            {% set icon_name = 'check-circle' %}
+            {% set icon_class = 'app-icon app-icon-md' %}
+            {% include 'partials/_heroicon.html' %}
+            <div>
+              <strong>Nothing urgent right now</strong>
+              <p class="muted-text">Your soon and expired queues are clear.</p>
+            </div>
+          </div>
+        {% endif %}
+      </section>
+
+      <section class="panel home-panel">
+        <div class="home-panel-header">
+          <div>
+            <p class="eyebrow">Latest items</p>
+            <h3 class="section-title">Recently tracked</h3>
+          </div>
+          <a class="utility-link" href="{{ request.url_for('inventory_home') }}">
+            <span>Open inventory</span>
+          </a>
+        </div>
+
+        {% if recent_preview %}
+          <div class="home-list">
+            {% for product in recent_preview %}
+              {% set type_visual = product_type_visual(product.product_type) %}
+              <a class="home-list-row tone-{{ type_visual.tone }}" href="{{ request.url_for('edit_product_page', product_id=product.id) }}">
+                <span class="product-card-icon home-list-icon" aria-hidden="true">
+                  {% include 'partials/_product_type_icon.html' %}
+                </span>
+                <div class="home-list-copy">
+                  <strong>{{ product.product_name }}</strong>
+                  <p class="muted-text">{{ product_type_visual(product.product_type).label }} · expires {{ format_date_display(product.expiry_date) }}</p>
+                </div>
+                {% set icon_name = 'pencil-square' %}
+                {% set icon_class = 'app-icon app-icon-sm home-row-action' %}
+                {% include 'partials/_heroicon.html' %}
+              </a>
+            {% endfor %}
+          </div>
+        {% else %}
+          <div class="home-empty-note">
+            {% set icon_name = 'sparkles' %}
+            {% set icon_class = 'app-icon app-icon-md' %}
+            {% include 'partials/_heroicon.html' %}
+            <div>
+              <strong>Start your inventory</strong>
+              <p class="muted-text">Add a few staples and this dashboard will begin to fill out.</p>
+            </div>
+          </div>
+        {% endif %}
+      </section>
+    </div>
+  </section>
+{% endblock %}
