@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <title>{% block title %}FrozenVault{% endblock %}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ request.url_for('static', path='css/app.css') }}">
+    <script src="https://unpkg.com/htmx.org@2.0.4" defer></script>
+    <script src="{{ request.url_for('static', path='js/app.js') }}" defer></script>
+  </head>
+  <body class="app-body">
+    <div class="app-frame">
+      <div class="app-shell">
+        <header class="app-header">
+          <div class="header-brand">
+            <a class="brand-home-link" href="{{ request.url_for('home_page') }}">
+              <div class="brand-lockup">
+                {% include 'partials/_brand_mark.html' %}
+                <div>
+                  <p class="eyebrow">FrozenVault</p>
+                  <h1>{{ screen_title | default('Welcome') }}</h1>
+                  <p class="header-subtitle">{{ screen_subtitle | default('Track what you have, what is running low, and what needs to be used soon.') }}</p>
+                </div>
+              </div>
+            </a>
+          </div>
+          {% if active_nav == 'home' %}
+            <a class="header-action" href="{{ request.url_for('new_product_page') }}">
+              {% set icon_name = 'plus' %}
+              {% set icon_class = 'app-icon app-icon-sm' %}
+              {% include 'partials/_heroicon.html' %}
+              <span>Add</span>
+            </a>
+          {% elif active_nav == 'inventory' %}
+            <a class="header-action" href="{{ request.url_for('new_product_page') }}">
+              {% set icon_name = 'plus' %}
+              {% set icon_class = 'app-icon app-icon-sm' %}
+              {% include 'partials/_heroicon.html' %}
+              <span>Add</span>
+            </a>
+          {% elif active_nav == 'soon' %}
+            <a class="header-action" href="{{ request.url_for('inventory_home') }}">
+              {% set icon_name = 'squares-2x2' %}
+              {% set icon_class = 'app-icon app-icon-sm' %}
+              {% include 'partials/_heroicon.html' %}
+              <span>Inventory</span>
+            </a>
+          {% else %}
+            <a class="header-action" href="{{ request.url_for('home_page') }}">
+              {% set icon_name = 'home' %}
+              {% set icon_class = 'app-icon app-icon-sm' %}
+              {% include 'partials/_heroicon.html' %}
+              <span>Home</span>
+            </a>
+          {% endif %}
+        </header>
+
+        {% include 'inventory/_flash.html' %}
+
+        <main class="app-main">
+          {% block content %}{% endblock %}
+        </main>
+      </div>
+
+      {% if active_nav != 'add' %}
+        {% include 'partials/_bottom_nav.html' %}
+      {% endif %}
+    </div>
+  </body>
+</html>

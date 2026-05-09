@@ -1,0 +1,147 @@
+<div class="panel form-panel">
+  <div class="form-header">
+    <div>
+      <p class="eyebrow">Inventory item</p>
+      <h2>{{ title }}</h2>
+      <p class="muted-text">Keep the details short and practical so the item is easy to scan later.</p>
+    </div>
+    <a class="utility-link" href="{{ request.url_for('inventory_home') }}">
+      {% set icon_name = 'squares-2x2' %}
+      {% set icon_class = 'app-icon app-icon-sm' %}
+      {% include 'partials/_heroicon.html' %}
+      <span>Back</span>
+    </a>
+  </div>
+
+  <form class="product-form" action="{{ action_url }}" method="post" novalidate>
+    {% if errors.__all__ %}
+      <div class="flash flash-error">
+        <p>{{ errors.__all__ }}</p>
+      </div>
+    {% endif %}
+
+    <section class="form-section">
+      <div class="form-section-header">
+        <p class="eyebrow">Identity</p>
+        <h3 class="section-title section-heading-with-icon">
+          {% set icon_name = 'document-text' %}
+          {% set icon_class = 'app-icon app-icon-sm' %}
+          {% include 'partials/_heroicon.html' %}
+          <span>Product details</span>
+        </h3>
+      </div>
+
+      <label class="field-group">
+        <span>Product name</span>
+        <input name="product_name" type="text" value="{{ form_data.product_name }}" required maxlength="50">
+        {% if errors.product_name %}<small class="field-error">{{ errors.product_name }}</small>{% endif %}
+      </label>
+
+      <label class="field-group">
+        <span>Description</span>
+        <textarea name="description" rows="3" maxlength="256">{{ form_data.description }}</textarea>
+        {% if errors.description %}<small class="field-error">{{ errors.description }}</small>{% endif %}
+      </label>
+    </section>
+
+    <section class="form-section">
+      <div class="form-section-header">
+        <p class="eyebrow">Amount</p>
+        <h3 class="section-title section-heading-with-icon">
+          {% set icon_name = 'scale' %}
+          {% set icon_class = 'app-icon app-icon-sm' %}
+          {% include 'partials/_heroicon.html' %}
+          <span>Quantity</span>
+        </h3>
+      </div>
+
+      <div class="control-grid compact-grid">
+        <label class="field-group">
+          <span>Quantity</span>
+          <input name="quantity" type="number" min="1" inputmode="numeric" value="{{ form_data.quantity }}" required>
+          {% if errors.quantity %}<small class="field-error">{{ errors.quantity }}</small>{% endif %}
+        </label>
+
+        <label class="field-group">
+          <span>Unit</span>
+          <select name="unit" required>
+            {% for option in unit_options %}
+              <option value="{{ option }}" {% if form_data.unit == option %}selected{% endif %}>{{ option }}</option>
+            {% endfor %}
+          </select>
+          {% if errors.unit %}<small class="field-error">{{ errors.unit }}</small>{% endif %}
+        </label>
+      </div>
+    </section>
+
+    <section class="form-section emphasis-section">
+      <div class="form-section-header">
+        <p class="eyebrow">Urgency</p>
+        <h3 class="section-title section-heading-with-icon">
+          {% set icon_name = 'calendar-days' %}
+          {% set icon_class = 'app-icon app-icon-sm' %}
+          {% include 'partials/_heroicon.html' %}
+          <span>Expiry</span>
+        </h3>
+      </div>
+
+      <div class="control-grid compact-grid">
+        <label class="field-group">
+          <span>Expiry date</span>
+          <input name="expiry_date_date" type="date" value="{{ form_data.expiry_date_date }}" required>
+        </label>
+      </div>
+
+      {% if errors.expiry_date %}<small class="field-error">{{ errors.expiry_date }}</small>{% endif %}
+    </section>
+
+    <section class="form-section">
+      <div class="form-section-header">
+        <p class="eyebrow">Storage</p>
+        <h3 class="section-title section-heading-with-icon">
+          {% set icon_name = 'map-pin' %}
+          {% set icon_class = 'app-icon app-icon-sm' %}
+          {% include 'partials/_heroicon.html' %}
+          <span>Storage details</span>
+        </h3>
+      </div>
+
+      <div class="control-grid compact-grid">
+        <label class="field-group">
+          <span>Location</span>
+          <select name="product_location" required>
+            {% for option in product_location_options %}
+              <option value="{{ option }}" {% if form_data.product_location == option %}selected{% endif %}>{{ option }}</option>
+            {% endfor %}
+          </select>
+          {% if errors.product_location %}<small class="field-error">{{ errors.product_location }}</small>{% endif %}
+        </label>
+
+        <label class="field-group">
+          <span>Type</span>
+          <select name="product_type" required>
+            {% for option in product_type_options %}
+              <option value="{{ option }}" {% if form_data.product_type == option %}selected{% endif %}>{{ option }}</option>
+            {% endfor %}
+          </select>
+          {% if errors.product_type %}<small class="field-error">{{ errors.product_type }}</small>{% endif %}
+        </label>
+      </div>
+    </section>
+
+    <div class="form-actions sticky-actions">
+      <a class="secondary-button" href="{{ request.url_for('inventory_home') }}">
+        {% set icon_name = 'x-circle' %}
+        {% set icon_class = 'app-icon app-icon-sm' %}
+        {% include 'partials/_heroicon.html' %}
+        <span>Cancel</span>
+      </a>
+      <button class="primary-button" type="submit">
+        {% set icon_name = 'check-circle' if 'Save' in submit_label else 'plus' %}
+        {% set icon_class = 'app-icon app-icon-sm' %}
+        {% include 'partials/_heroicon.html' %}
+        <span>{{ submit_label }}</span>
+      </button>
+    </div>
+  </form>
+</div>

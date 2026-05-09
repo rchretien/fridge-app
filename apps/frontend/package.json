@@ -1,0 +1,12 @@
+{
+  "name": "fridge-app-frontend",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Lightweight frontend assets for the Fridge App web UI",
+  "scripts": {
+    "icons:list": "ls node_modules/heroicons/24/outline"
+  },
+  "dependencies": {
+    "heroicons": "^2.2.0"
+  }
+}

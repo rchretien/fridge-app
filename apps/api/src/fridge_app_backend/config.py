@@ -32,8 +32,8 @@ class Config(BaseSettings):
     )
 
     # API specic variables
-    api_name: str = "Fridge Inventory App Backend"
-    api_description: str = "CRUD API for managing a fridge inventory."
+    api_name: str = "FrozenVault Backend"
+    api_description: str = "CRUD API for managing the FrozenVault inventory."
     api_version: str = "0.1.0"
     brussels_tz_name: str = "Europe/Brussels"
     commit_sha: str | None = None

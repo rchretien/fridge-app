@@ -94,6 +94,24 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
         # Count total records directly from the base model (more efficient)
         count_statement = select(func.count()).select_from(self.model)
 
+        return self._build_paginated_response(
+            session=session,
+            data_statement=data_statement,
+            count_statement=count_statement,
+            offset=offset,
+            limit=limit,
+        )
+
+    def _build_paginated_response(
+        self,
+        *,
+        session: Session,
+        data_statement: Any,
+        count_statement: Any,
+        offset: int,
+        limit: int,
+    ) -> PaginatedResponse[ModelType]:
+        """Build a paginated response from prepared data and count statements."""
         return PaginatedResponse(
             data=list(session.scalars(data_statement).all()),
             total=session.scalar(count_statement) or 0,

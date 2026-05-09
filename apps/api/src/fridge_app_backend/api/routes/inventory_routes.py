@@ -1,5 +1,6 @@
 """Endpoints for interacting with the fridge inventory."""
 
+from datetime import datetime
 from typing import Annotated
 
 from fastapi import APIRouter, Query
@@ -7,9 +8,11 @@ from fastapi.responses import Response
 from starlette.status import HTTP_200_OK, HTTP_201_CREATED, HTTP_204_NO_CONTENT, HTTP_404_NOT_FOUND
 
 from fridge_app_backend.api.dependencies.product_dependencies import (
+    ProductDependency,
     SessionDependency,
     ValidatedProductUpdateDependency,
 )
+from fridge_app_backend.config import config
 from fridge_app_backend.orm.crud.product_crud import product_crud
 from fridge_app_backend.orm.enums.base_enums import OrderByEnum
 from fridge_app_backend.orm.schemas.product_schemas import (
@@ -36,6 +39,7 @@ async def create_product(
     create_product_in: ProductCreate, session: SessionDependency
 ) -> CreatedProduct:
     """Create a new product."""
+    create_product_in.validate_against_creation_date(datetime.now(tz=config.brussels_tz))
     return CreatedProduct.from_model(product_crud.create(session, obj_in=create_product_in))
 
 
@@ -103,6 +107,9 @@ async def update_product(
     },
     status_code=HTTP_204_NO_CONTENT,
 )
-async def delete_product() -> Response:
+async def delete_product(
+    product_id: int, product: ProductDependency, session: SessionDependency
+) -> Response:
     """Delete a product."""
+    product_crud.remove(session=session, row_id=product.id)
     return Response(status_code=HTTP_204_NO_CONTENT)

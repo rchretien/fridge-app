@@ -9,7 +9,8 @@ from typing import Any
 
 from fastapi import FastAPI, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse, RedirectResponse
+from fastapi.responses import JSONResponse
+from fastapi.staticfiles import StaticFiles
 from starlette.status import HTTP_400_BAD_REQUEST
 
 from fridge_app_backend.api.routes.inventory_routes import inventory_router
@@ -21,6 +22,8 @@ from fridge_app_backend.exceptions import (
     InvalidProductTypeError,
 )
 from fridge_app_backend.orm.database import initialise_db
+from fridge_app_backend.web.routes import inventory_web_router
+from fridge_app_backend.web.templating import STATIC_DIR
 
 logger = logging.getLogger(__name__)
 logger.info("Running COMMIT", extra={"commit": config.commit_sha})
@@ -62,8 +65,11 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
+app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
+
 app.include_router(inventory_router)
 app.include_router(utils_router)
+app.include_router(inventory_web_router)
 
 
 # Exception handlers for validation errors
@@ -122,13 +128,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-
-# Redirect response to docs
-@app.get("/", include_in_schema=False, response_class=Response)
-def go_to_docs() -> Response:
-    """Redirect to docs."""
-    return RedirectResponse(url="/docs")
 
 
 @app.get("/index", include_in_schema=False)

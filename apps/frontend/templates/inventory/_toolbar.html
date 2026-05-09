@@ -1,0 +1,110 @@
+<section class="panel toolbar-panel">
+  <form
+    id="inventory-controls"
+    class="inventory-controls"
+    action="{{ request.url_for('inventory_home') }}"
+    method="get"
+  >
+    <label class="field-group search-group">
+      <span>Search products</span>
+      <div class="input-with-icon">
+        {% set icon_name = 'magnifying-glass' %}
+        {% set icon_class = 'field-leading-icon' %}
+        {% include 'partials/_heroicon.html' %}
+        <input
+          type="search"
+          name="q"
+          value="{{ filters.q }}"
+          placeholder="Start typing a product name"
+          hx-get="{{ request.url_for('render_inventory_list_fragment') }}"
+          hx-trigger="keyup changed delay:300ms, search"
+          hx-target="#inventory-results"
+          hx-swap="outerHTML"
+          hx-include="#inventory-controls"
+        >
+      </div>
+    </label>
+
+    <div class="urgency-tabs" role="tablist" aria-label="Inventory scope">
+      <a class="urgency-tab {% if filters.urgency == 'all' %}is-active{% endif %}" href="{{ request.url_for('inventory_home') }}">All</a>
+      <a class="urgency-tab {% if filters.urgency == 'soon' %}is-active{% endif %}" href="{{ request.url_for('inventory_soon') }}">Soon</a>
+      <a class="urgency-tab {% if filters.urgency == 'expired' %}is-active{% endif %}" href="{{ request.url_for('inventory_soon') }}?urgency=expired">Expired</a>
+    </div>
+
+    <details class="advanced-filters" {% if filters.product_type or filters.product_location or filters.sort != 'newest' %}open{% endif %}>
+      <summary>
+        {% set icon_name = 'funnel' %}
+        {% set icon_class = 'app-icon app-icon-sm' %}
+        {% include 'partials/_heroicon.html' %}
+        <span>More filters</span>
+      </summary>
+
+      <div class="control-grid compact-grid">
+        <label class="field-group">
+          <span>Sort</span>
+          <select
+            name="sort"
+            hx-get="{{ request.url_for('render_inventory_list_fragment') }}"
+            hx-trigger="change"
+            hx-target="#inventory-results"
+            hx-swap="outerHTML"
+            hx-include="#inventory-controls"
+          >
+            {% for option_value, option_label in sort_options %}
+              <option value="{{ option_value }}" {% if filters.sort == option_value %}selected{% endif %}>{{ option_label }}</option>
+            {% endfor %}
+          </select>
+        </label>
+
+        <label class="field-group">
+          <span>Type</span>
+          <select
+            name="product_type"
+            hx-get="{{ request.url_for('render_inventory_list_fragment') }}"
+            hx-trigger="change"
+            hx-target="#inventory-results"
+            hx-swap="outerHTML"
+            hx-include="#inventory-controls"
+          >
+            <option value="">All types</option>
+            {% for option in product_type_options %}
+              <option value="{{ option }}" {% if filters.product_type == option %}selected{% endif %}>{{ option }}</option>
+            {% endfor %}
+          </select>
+        </label>
+
+        <label class="field-group">
+          <span>Location</span>
+          <select
+            name="product_location"
+            hx-get="{{ request.url_for('render_inventory_list_fragment') }}"
+            hx-trigger="change"
+            hx-target="#inventory-results"
+            hx-swap="outerHTML"
+            hx-include="#inventory-controls"
+          >
+            <option value="">All locations</option>
+            {% for option in product_location_options %}
+              <option value="{{ option }}" {% if filters.product_location == option %}selected{% endif %}>{{ option }}</option>
+            {% endfor %}
+          </select>
+        </label>
+      </div>
+    </details>
+
+    <input type="hidden" name="limit" value="{{ filters.limit }}">
+    <input type="hidden" name="urgency" value="{{ filters.urgency }}">
+    
+    {% if filters.q or filters.product_type or filters.product_location or filters.sort != 'newest' %}
+      <div class="toolbar-actions toolbar-actions-compact">
+        <a class="utility-link" href="{{ request.url_for('inventory_home') if active_nav == 'inventory' else request.url_for('inventory_soon') }}">
+          {% set icon_name = 'arrow-path' %}
+          {% set icon_class = 'app-icon app-icon-sm' %}
+          {% include 'partials/_heroicon.html' %}
+          <span>Reset view</span>
+        </a>
+        <p class="muted-text toolbar-hint">Results refresh automatically when filters change.</p>
+      </div>
+    {% endif %}
+  </form>
+</section>
