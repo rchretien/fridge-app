@@ -13,6 +13,10 @@ printf 'Checking static CSS through Nginx...\n'
 curl --fail --silent --show-error --insecure --head \
   "${BASE_URL}/fridge-app/static/css/app.css" >/dev/null
 
+printf 'Checking deployment metadata endpoint...\n'
+curl --fail --silent --show-error --insecure \
+  "${BASE_URL}/fridge-app/utils/deployment" >/dev/null
+
 printf 'Checking generated HTML for mixed-content local URLs...\n'
 html="$(curl --fail --silent --show-error --insecure "${BASE_URL}/fridge-app/")"
 insecure_url_pattern='(href|src|action|hx-get|hx-post|hx-put|hx-delete)=["'"'"']http://'
