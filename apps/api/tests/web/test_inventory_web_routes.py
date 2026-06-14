@@ -202,6 +202,7 @@ def test_more_page_renders_utility_screen(client: TestClient) -> None:
     assert response.status_code == httpx.codes.OK
     assert "Tools" in response.text
     assert "API documentation" in response.text
+    assert 'href="/docs"' in response.text
 
 
 def test_new_product_page_renders_form(client: TestClient) -> None:
